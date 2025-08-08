@@ -36,7 +36,7 @@ tmpmail_email_address="$tmpmail_dir/email_address"
 tmpmail_html_email="$tmpmail_dir/tmpmail.html"
 
 # Default 1secmail API URL
-tmpmail_api_url="https://www.1secmail.com/api/v1/"
+tmpmail_api_url="http://emptyinbox.me/api"
 
 usage() {
     # Using 'cat << EOF' we can easily output a multiline text. This is much
@@ -183,15 +183,10 @@ list_emails() {
     # List all the received emails in a nicely formatted order
     #
     # Fetch the email data using 1secmail's API
-    data=$(curl -sL "$tmpmail_api_url?action=getMessages&login=$username&domain=$domain")
-
+    data=$(curl -sL "$tmpmail_api_url/messages" -H "Authorization:Bearer btc")
     # Using 'jq' we get the length of the JSON data. From this we can determine whether or not
     # the email address has gotten any emails
     data_length=$(printf %s "$data" | jq length)
-
-    # We are showing what email address is currently being used
-    # in case the user has forgotten what the email address was.
-    printf "[ Inbox for %s ]\n\n" "$email_address"
 
     # If the length of the data we got is 0, that means the email address
     # has not received any emails yet.
@@ -209,14 +204,14 @@ list_emails() {
         # emails in the array
         mail_data=$(printf %s "$data" | jq -r ".[$index-1]")
         id=$(printf %s "$mail_data" | jq -r ".id")
-        from=$(printf %s "$mail_data" | jq -r ".from")
+        to=$(printf %s "$mail_data" | jq -r ".inbox")
         subject=$(printf %s "$mail_data" | jq -r ".subject")
 
         # The '||' are used as a divideder for 'column'. 'column' will use this divider as
         # a point of reference to create the division. By default 'column' uses a blank space
         # but that would not work in our case as the email subject could have multiple white spaces
         # and 'column' would split the words that are seperated by white space, in different columns.
-        inbox="$inbox$id ||$from ||$subject\n"
+        inbox="$inbox$id ||$to ||$subject\n"
         index=$((index + 1))
     done
 
@@ -235,8 +230,8 @@ view_email() {
     #
     # The first argument provided to this function will be the ID of the email
     # that has been received
-    email_id="$1"
-    data=$(curl -sL "$tmpmail_api_url?action=readMessage&login=$username&domain=$domain&id=$email_id")
+    inbox_id="$1"
+    data=$(curl -sL "$tmpmail_api_url/message/$inbox_id" -H "Authorization:Bearer btc")
 
     # After the data is retrieved using the API, we have to check if we got any emails.
     # Luckily 1secmail's API is not complicated and returns 'Message not found' as plain text
@@ -245,9 +240,9 @@ view_email() {
     [ "$data" = "Message not found" ] && die "Message not found"
 
     # We pass the $data to 'jq' which extracts the values
-    from=$(printf %s "$data" | jq -r ".from")
-    subject=$(printf %s "$data" | jq -r ".subject")
-    html_body=$(printf %s "$data" | jq -r ".htmlBody")
+    from=$(printf %s "$data" | jq -r ".sender")
+    subject=$(printf %s "$data" | jq -r ".Subject")
+    html_body=$(printf %s "$data" | jq -r ".body")
     attachments=$(printf %s "$data" | jq -r ".attachments | length")
     
     # If you get an email that is in pure text, the .htmlBody field will be empty and
@@ -308,8 +303,9 @@ view_recent_email() {
     # normally see on the terminal when running 'tmpmail'.
     # We then grab the ID of the most recent
     # email, which the first line.
-    mail_id=$(list_emails | head -3 | tail -1 | cut -d' ' -f 1)
-    view_email "$mail_id"
+    inbox_id=$(list_emails | head -3 | tail -1 | cut -d' ' -f 1)
+    echo $inbox_id
+    view_email "$inbox_id"
 }
 
 

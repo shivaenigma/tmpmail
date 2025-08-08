@@ -244,11 +244,11 @@ view_email() {
     to=$(printf %s "$data" | jq -r ".headers.To")
     subject=$(printf %s "$data" | jq -r ".headers.Subject")
     html_body=$(printf %s "$data" | jq -r ".html_body")
-    text_body=$(printf %s "$data" | jq -r ".text_body")
+    text_body=$(printf %s "$data" | jq  -r ".text_body")
     attachments=$(printf %s "$data" | jq -r ".attachments | length")
     # If you get an email that is in pure text, the .htmlBody field will be empty and
     # we will need to get the content from .textBody instead
-    [ -z "$html_body" ] && html_body="<pre>$(printf %s "$data" | jq -r ".text_body")</pre>"
+    [ "$html_body" = "null" ] && html_body="<pre>$(printf %s "$data" | jq -r ".text_body")</pre>"
 
     # Create the HTML with all the information that is relevant and then
     # assigning that HTML to the variable html_mail. This is the best method
@@ -262,8 +262,7 @@ $html_body
 EOF
 )
 
-#If text body available show that else use w3m to convert html to text
-text_mail="To: $to\nFrom: $from\nSubject: $subject\n$text_body"
+
     
     if [ ! "$attachments" = "0" ]; then
         html_mail="$html_mail<br><b>[Attachments]</b><br>"
@@ -292,7 +291,15 @@ text_mail="To: $to\nFrom: $from\nSubject: $subject\n$text_body"
 
     # If the '--text' flag is used, then use 'w3m' to convert the HTML of
     # the email to pure text by removing all the HTML tags
-    [ "$raw_text" = true ] && echo $text_mail && exit
+    if [ "$raw_text" = true ]; then
+	    if [ "$text_body" = "null" ]; then
+		    w3m -dump $tmpmail_html_email
+	    else	
+		    text_mail="To: $to\nFrom: $from\nSubject: $subject\n$text_body"
+		    echo $text_mail
+	    fi
+	    exit
+    fi
 
     # Open up the HTML file using $browser. By default,
     # this will be 'w3m'.
@@ -307,7 +314,7 @@ view_recent_email() {
     # normally see on the terminal when running 'tmpmail'.
     # We then grab the ID of the most recent
     # email, which the first line.
-    inbox_id=$(list_emails | head -3 | tail -1 | cut -d' ' -f 1)
+    inbox_id=$(list_emails | head -1 | cut -d' ' -f 1)
     echo $inbox_id
     view_email "$inbox_id"
 }

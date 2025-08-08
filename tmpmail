@@ -205,7 +205,7 @@ list_emails() {
         mail_data=$(printf %s "$data" | jq -r ".[$index-1]")
         id=$(printf %s "$mail_data" | jq -r ".id")
         to=$(printf %s "$mail_data" | jq -r ".inbox")
-        subject=$(printf %s "$mail_data" | jq -r ".subject")
+        subject=$(printf %s "$mail_data" | jq -r ".Subject")
 
         # The '||' are used as a divideder for 'column'. 'column' will use this divider as
         # a point of reference to create the division. By default 'column' uses a blank space
@@ -241,10 +241,11 @@ view_email() {
 
     # We pass the $data to 'jq' which extracts the values
     from=$(printf %s "$data" | jq -r ".sender")
-    subject=$(printf %s "$data" | jq -r ".Subject")
-    html_body=$(printf %s "$data" | jq -r ".body")
+    to=$(printf %s "$data" | jq -r ".headers.To")
+    subject=$(printf %s "$data" | jq -r ".headers.Subject")
+    html_body=$(printf %s "$data" | jq -r ".html_body")
+    text_body=$(printf %s "$data" | jq -r ".text_body")
     attachments=$(printf %s "$data" | jq -r ".attachments | length")
-    
     # If you get an email that is in pure text, the .htmlBody field will be empty and
     # we will need to get the content from .textBody instead
     [ -z "$html_body" ] && html_body="<pre>$(printf %s "$data" | jq -r ".textBody")</pre>"
@@ -253,13 +254,20 @@ view_email() {
     # assigning that HTML to the variable html_mail. This is the best method
     # to create a multiline variable
     html_mail=$(cat <<EOF
-<pre><b>To: </b>$email_address
+<pre><b>To: </b>$to
 <b>From: </b>$from
 <b>Subject: </b>$subject</pre>
 $html_body
 
 EOF
 )
+
+#If text body available show that else use w3m to convert html to text
+if [ -n "$text_body" ]; then
+text_mail="To: $to\nFrom: $from\nSubject: $subject\n$text_body"
+else
+text_mail="w3m -dump $html_email"
+fi
     
     if [ ! "$attachments" = "0" ]; then
         html_mail="$html_mail<br><b>[Attachments]</b><br>"
@@ -288,7 +296,7 @@ EOF
 
     # If the '--text' flag is used, then use 'w3m' to convert the HTML of
     # the email to pure text by removing all the HTML tags
-    [ "$raw_text" = true ] && w3m -dump "$tmpmail_html_email" && exit
+    [ "$raw_text" = true ] && echo $text_mail && exit
 
     # Open up the HTML file using $browser. By default,
     # this will be 'w3m'.

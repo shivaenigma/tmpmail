@@ -59,11 +59,10 @@ shows the email message with specified ID.
         clipboard (default: xclip -selection c)
 -c, --copy
         Copy the email address to your clipboard
--d, --domains
-        Show list of available domains
--g, --generate [ADDRESS]
-        Generate a new email address, either the specified ADDRESS, or
-        randomly create one
+-i, --inboxes
+        Show list of available inboxes
+-g, --generate 
+        Generate a new email inbox        
 -h, --help
         Show help
 -r, --recent
@@ -91,80 +90,14 @@ get_list_of_domains() {
     printf "%s" "$data" | tr -d "[|]|\"" | tr "," " "
 }
 
-show_list_of_domains() {
-    # Convert the list of domains which are in a singal line, into multiple lines
-    # with a dash in the beginning of each domain for a clean output
-    domains=$(printf "%s" "$(get_list_of_domains)" | tr " " "\n" | sed "s/^/- /g")
-    printf "List of available domains: \n%s\n" "$domains"
+show_inboxes() {
+    data=$(curl -sL "$tmpmail_api_url/inboxes" -H "Authorization:Bearer btc" | jq -r '.[ ]')
+    echo "$data"
 }
 
-generate_email_address() {
-    # There are 2 ways which this function is called in this script.
-    #  [1] The user wants to generate a new email and runs 'tmpmail --generate'
-    #  [2] The user runs 'tmpmail' to check the inbox , but /tmp/tmpmail/email_address
-    #      is empty or nonexistant. Therefore a new email gets automatically
-    #      generated before showing the inbox. But of course the inbox will
-    #      be empty as the newly generated email address has not been
-    #      sent any emails.
-    #
-    # When the function 'generate_email_address()' is called with the arguement
-    # 'true', it means that the function was called because the user
-    # ran 'tmpmail --generate'.
-    #
-    # We need this variable so we can know whether or not we need to show the user
-    # what the email was. <-- More about this can be found further down in this function.
-    externally=${1:-false}
-
-    # This variable lets generate_email_address know if the user has provided a custom
-    # email address which they want to use. custom is set to false if $2 has no value.
-    custom=${2:-false}
-
-    # Generate a random email address.
-    # This function is called whenever the user wants to generate a new email
-    # address by running 'tmpmail --generate' or when the user runs 'tmpmail'
-    # but /tmp/tmpmail/email_address is empty or nonexistent.
-    #
-    # We create a random username by taking the first 10 lines from /dev/random
-    # and delete all the characters which are *not* lower case letters from A to Z.
-    # So charcters such as dashes, periods, underscore, and numbers are all deleted,
-    # giving us a text which only contains lower case letters form A to Z. We then take
-    # the first 10 characters, which will be the username of the email address
-    username=$(head /dev/urandom | LC_ALL=C tr -dc "[:alnum:]" | cut -c1-11 | tr "[:upper:]" "[:lower:]")
-
-    # Generate a regex for valif email adress by fetching the list of supported domains
-    valid_email_address_regex=$(printf "[a-z0-9]+@%s" "$(get_list_of_domains | tr ' ' '|')")
-    username_black_list_regex="(abuse|webmaster|contact|postmaster|hostmaster|admin)"
-    username_black_list="- abuse\n- webmaster\n- contact\n- postmaster\n- hostmaster\n- admin"
-
-    # Randomly pick one of the domains mentioned above.
-    domain=$(printf "%b" "$(get_list_of_domains)" | tr " " "\n" | randomize | tail -1)
-
-    email_address="$username@$domain"
-
-    # If the user provided a custom email address then use that email address
-    if [ "$custom" != false ]; then
-        email_address=$custom
-
-        # Check if the user is using username in the email address which appears
-        # in the black list.
-        if printf %b "$email_address" | grep -Eq "$username_black_list_regex"; then
-            die "For security reasons, that username cannot be used. Here are the blacklisted usernames:\n$username_black_list"
-        fi
-
-        # Do a regex check to see if the email address provided by the user is a
-        # valid email address
-        if ! printf %b "$email_address" | grep -Eq "$valid_email_address_regex"; then
-            die "Provided email is invalid. Must match $valid_email_address_regex"
-        fi
-    fi
-
-    # Save the generated email address to the $tmpmail_email_address file
-    # so that it can be whenever 'tmpmail' is run
-    printf %s "$email_address" >"$tmpmail_email_address"
-
-    # If this function was called because the user wanted to generate a new
-    # email address, show them the email address
-    [ "$externally" = true ] && cat "$tmpmail_email_address" && printf "\n"
+generate_inbox() {
+    data=$(curl -d'{}' -sL "$tmpmail_api_url/inbox" -H "Authorization:Bearer btc")
+    echo $data
 }
 
 get_email_address() {
@@ -387,8 +320,8 @@ main() {
     while [ "$1" ]; do
         case "$1" in
             --help | -h) usage && exit ;;
-            --domains | -d) show_list_of_domains && exit ;;
-            --generate | -g) generate_email_address true "$2" && exit ;;
+            --inboxes | -i) show_inboxes && exit ;;
+            --generate | -g) generate_inbox  && exit ;;
             --clipboard-cmd) copy_to_clipboard_cmd="$2" ;;
             --copy | -c) copy_email_to_clipboard && exit ;;
             --browser | -b) browser="$2" ;;

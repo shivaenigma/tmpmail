@@ -63,6 +63,13 @@ $ docker run -it mail;
 ```   
 
 ## Usage
+
+Get your APIKEY from https://emptyinbox.me
+```bash
+cp config.txt.sample config.txt
+Edit config.txt to set APIKEY
+```
+
 ```console
 $ tmpmail --help
 tmpmail

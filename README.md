@@ -3,8 +3,8 @@
 </h1>
 <p align="center"> A temporary email right from your terminal written in POSIX sh</p><br>
 
-<img src="images/demo.gif" align="right"> `tmpmail` is a command line utility written in POSIX `sh` that allows you to create a temporary email address
-and receive emails to the temporary email address. It uses 1secmail's [API](https://www.1secmail.com/api/)
+<img src="images/demo.gif" align="right"> `tmpmail` is a command line utility written in POSIX `sh` that allows you to create temporary inboxes
+and receive emails to the temporary inboxes. It uses emptyinbox.me [API](https://emptyinbox.me/api/)
 to receive emails.
 
 By default `w3m` is used to render the HTML emails on the terminal.

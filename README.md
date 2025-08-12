@@ -62,14 +62,14 @@ $ docker build -t mail .; # Dockerfile available in source code
 $ docker run -it mail;
 ```   
 
-## Usage
-
+## First time Setup
 Get your APIKEY from https://emptyinbox.me
 ```bash
 cp config.txt.sample config.txt
 Edit config.txt to set APIKEY
 ```
 
+## Usage
 ```console
 $ tmpmail --help
 tmpmail

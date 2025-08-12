@@ -36,7 +36,7 @@ tmpmail_email_address="$tmpmail_dir/email_address"
 tmpmail_html_email="$tmpmail_dir/tmpmail.html"
 
 # Default 1secmail API URL
-tmpmail_api_url="http://emptyinbox.me/api"
+tmpmail_api_url="https://emptyinbox.me/api"
 
 usage() {
     # Using 'cat << EOF' we can easily output a multiline text. This is much
@@ -90,7 +90,7 @@ get_list_of_domains() {
     printf "%s" "$data" | tr -d "[|]|\"" | tr "," " "
 }
 
-show_inboxes() {
+list_inboxes() {
     data=$(curl -sL "$tmpmail_api_url/inboxes" -H "Authorization:Bearer btc" | jq -r '.[ ]')
     echo "$data"
 }
@@ -98,18 +98,6 @@ show_inboxes() {
 generate_inbox() {
     data=$(curl -d'{}' -sL "$tmpmail_api_url/inbox" -H "Authorization:Bearer btc")
     echo $data
-}
-
-get_email_address() {
-    # This function is only called once and that is when this script
-    # get executed. The output of this function gets stored in $email_address
-    #
-    # If the file that contains the email address is empty,
-    # that means we do not have an email address, so generate one.
-    [ ! -s "$tmpmail_email_address" ] && generate_email_address
-
-    # Output the email address by getting the first line of $tmpmail_email
-    head -n 1 "$tmpmail_email_address"
 }
 
 list_emails() {
@@ -301,8 +289,6 @@ main() {
     # if it already exists
     mkdir -p "$tmpmail_dir"
 
-    # Get the email address and save the value to the email_address variable
-    email_address="$(get_email_address)"
 
     # ${VAR#PATTERN} Removes shortest match of pattern from start of a string.
     # In this case, it takes the email_address and removed everything after
@@ -320,7 +306,7 @@ main() {
     while [ "$1" ]; do
         case "$1" in
             --help | -h) usage && exit ;;
-            --inboxes | -i) show_inboxes && exit ;;
+            --list | -l) list_inboxes && exit ;;
             --generate | -g) generate_inbox  && exit ;;
             --clipboard-cmd) copy_to_clipboard_cmd="$2" ;;
             --copy | -c) copy_email_to_clipboard && exit ;;

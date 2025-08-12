@@ -96,7 +96,7 @@ TOP_PID=$$
 
 call_api() {
     # Fetch the email data using inboxme API and exit script if got abnormal http code
-    response=$(curl -w "%{http_code}" -sL "$tmpmail_api_url/$1" -H "Authorization:Bearer $APIKEY")
+    response=$(curl -w "\n%{http_code}" -sL "$tmpmail_api_url/$1" -H "Authorization:Bearer $APIKEY")
     http_code=$(tail -n1 <<< "$response")  # get the last line
     data=$(sed '$ d' <<< "$response")   # get all but the last line which contains the status code
 

@@ -67,7 +67,7 @@ $ docker run -it mail;
 $ tmpmail --help
 tmpmail
 tmpmail -h | --version
-tmpmail -g [ADDRESS]
+tmpmail -g 
 tmpmail [-t | -b BROWSER] -r | ID
 
 When called with no option and no argument, tmpmail lists the messages in
@@ -82,11 +82,10 @@ shows the email message with specified ID.
         clipboard (default: xclip -selection c)
 -c, --copy
         Copy the email address to your clipboard
--d, --domains
-        Show list of available domains
--g, --generate [ADDRESS]
-        Generate a new email address, either the specified ADDRESS, or
-        randomly create one
+-i, --inboxes
+        Show list of available inboxes
+-g, --generate 
+        Generate a new email inbox        
 -h, --help
         Show help
 -r, --recent
@@ -102,26 +101,24 @@ shows the email message with specified ID.
 Create random email
 ```console
 $ tmpmail --generate
-xoithrjagpx@1secmail.net
+nutty.baby.cave@emptyinbox.me
 ```
-
-Create custom email
-```console
-$ tmpmail --generate mycustomemail@1secmail.com
-mycustomemail@1secmail.com
-```
-
 View the inbox
 ```console
 $ tmpmail
-[ Inbox for wdebivbyjor@1secmail.com ]
 
-83414443   username@example.com   Test Email
+007ecc89     admin@emptyinbox.me                 Hi admin
+86acd15c     huge.blue.father@emptyinbox.me      New email here
+f4174aed     huge.blue.father@emptyinbox.me      Test email
+0ca9e983     pretty.clever.tub@emptyinbox.me     This is the subject
+5d9aac58     pretty.clever.tub@emptyinbox.me     New email here
+298baf00     real.dull.chin@emptyinbox.me        This is the subject
+
 ```
 
 View the email
 ```console
-$ tmpmail 83414443
+$ tmpmail 007ecc89
 ```
 
 View the most recent email
@@ -132,15 +129,11 @@ $ tmpmail -r
 View emails as pure text
 ```console
 $ tmpmail -t 83414443
-To: wdebivbyjor@1secmail.com
+To: nutty.baby.cave@emptyinbox.me
 From: username@example.com
 Subject: Test Email
 
 Hello World
-
-[Attachments]
-https://is.gd/aBCdEf [apple.jpg]
-https://is.gd/AbCDeF [ball.jpg]
 ```
 
 ## Credits

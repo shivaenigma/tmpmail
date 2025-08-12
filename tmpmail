@@ -1,4 +1,7 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+source ./config.txt
+[ -z "$APIKEY" ] && echo "Missing API Key. Please specify APIKey in config.txt" && exit
+	
 #
 # by Siddharth Dushantha 2020
 #
@@ -75,36 +78,40 @@ shows the email message with specified ID.
 EOF
 }
 
-get_list_of_domains() {
-    # Getting domains list from 1secmail API
-    data=$(curl -sL "$tmpmail_api_url?action=getDomainList") 
-
-    # Number of available domains
-    data_length=$(printf %s "$data" | jq length)
-
-    # If the length of the data we got is 0, that means the email address
-    # has not received any emails yet.
-    [ "$data_length" -eq 0 ] && echo "1secmail API error for getting domains list" && exit
-
-    # Getting rid of quotes, braces and replace comma with space
-    printf "%s" "$data" | tr -d "[|]|\"" | tr "," " "
-}
 
 list_inboxes() {
-    data=$(curl -sL "$tmpmail_api_url/inboxes" -H "Authorization:Bearer btc" | jq -r '.[ ]')
-    echo "$data"
+    data=$(call_api inboxes)
+    out=$(printf "%s" "$data" | jq -r '.[ ]')
+    echo "$out"
 }
 
 generate_inbox() {
-    data=$(curl -d'{}' -sL "$tmpmail_api_url/inbox" -H "Authorization:Bearer btc")
+    data=$(curl -d'{}' -sL "$tmpmail_api_url/inbox" -H "Authorization:Bearer $APIKEY")
+    echo $data
+}
+
+trap "exit 1" TERM
+TOP_PID=$$
+
+
+call_api() {
+    # Fetch the email data using inboxme API and exit script if got abnormal http code
+    response=$(curl -w "%{http_code}" -sL "$tmpmail_api_url/$1" -H "Authorization:Bearer $APIKEY")
+    http_code=$(tail -n1 <<< "$response")  # get the last line
+    data=$(sed '$ d' <<< "$response")   # get all but the last line which contains the status code
+
+    if [ "$http_code" -gt 400 ]; then
+	    echo "$data" 1>&2
+	    kill -s TERM $TOP_PID
+    fi 	    
     echo $data
 }
 
 list_emails() {
     # List all the received emails in a nicely formatted order
     #
-    # Fetch the email data using 1secmail's API
-    data=$(curl -sL "$tmpmail_api_url/messages" -H "Authorization:Bearer btc")
+    data=$(call_api messages) 
+
     # Using 'jq' we get the length of the JSON data. From this we can determine whether or not
     # the email address has gotten any emails
     data_length=$(printf %s "$data" | jq length)
@@ -140,11 +147,6 @@ list_emails() {
     printf "%b" "$inbox" | column -t -s "||"
 }
 
-randomize() {
-    # We could use 'shuf' and 'sort -R' but they are not a part of POSIX
-    awk 'BEGIN {srand();} {print rand(), $0}' | \
-        sort -n -k1 | cut -d' ' -f2
-}
 
 view_email() {
     # View an email by providing it's ID
@@ -152,7 +154,7 @@ view_email() {
     # The first argument provided to this function will be the ID of the email
     # that has been received
     inbox_id="$1"
-    data=$(curl -sL "$tmpmail_api_url/message/$inbox_id" -H "Authorization:Bearer btc")
+    data=$(call_api message/$inbox_id)
 
     # After the data is retrieved using the API, we have to check if we got any emails.
     # Luckily 1secmail's API is not complicated and returns 'Message not found' as plain text

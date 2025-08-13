@@ -73,7 +73,6 @@ View the inbox
 ```console
 $ tmpmail
 
-007ecc89     admin@emptyinbox.me                 Hi admin
 86acd15c     huge.blue.father@emptyinbox.me      New email here
 f4174aed     huge.blue.father@emptyinbox.me      Test email
 0ca9e983     pretty.clever.tub@emptyinbox.me     This is the subject
@@ -84,7 +83,7 @@ f4174aed     huge.blue.father@emptyinbox.me      Test email
 
 View the email
 ```console
-$ tmpmail 007ecc89
+$ tmpmail 086acd15c   
 ```
 
 View the most recent email

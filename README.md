@@ -3,9 +3,8 @@
 </h1>
 <p align="center"> A temporary email right from your terminal written in POSIX sh</p><br>
 
-<img src="images/demo.gif" align="right"> `tmpmail` is a command line utility written in POSIX `sh` that allows you to create temporary inboxes
-and receive emails to the temporary inboxes. It uses emptyinbox.me [API](https://emptyinbox.me/api/)
-to receive emails.
+<img src="images/demo.gif" align="right"> `tmpmail` is a command line utility written in POSIX `sh` that allows you to create multiple inboxes
+and receive temporary emails to these inboxes. It uses [emptyinbox.me API](https://emptyinbox.me/docs.html) to receive emails.
 
 By default `w3m` is used to render the HTML emails on the terminal.
 But if you prefer another text based web browser or would rather view the email in a GUI web browser such as Firefox, simply
@@ -21,46 +20,6 @@ use the `--browser` argument followed by the command needed to launch the web br
 - [`jq`](https://github.com/stedolan/jq)
 - `xclip`
 
-## Installation
-### Install locally
-
-```bash
-# Download the tmpmail file and make it executable
-$ curl -L "https://raw.githubusercontent.com/sdushantha/tmpmail/master/tmpmail" > tmpmail && chmod +x tmpmail
-
-# Then move it somewhere in your $PATH. Here is an example:
-$ mv tmpmail ~/bin/
-```
-
-### AUR
-`tmpmail` is available on the [AUR](https://aur.archlinux.org/packages/tmpmail-git/), which is currently being maintained by [Benjamin Bädorf](https://github.com/b12f)
-
-```bash
-$ yay -S tmpmail-git
-```
-
-### [Pacstall](https://github.com/pacstall/pacstall) (Debian/Ubuntu)
-`tmpmail` is available on the [pacstall-programs repository](https://github.com/pacstall/pacstall-programs/blob/master/packages/tmpmail-bin/tmpmail-bin.pacscript), which is being currently being maintained by [wizard-28](https://github.com/wizard-28)
-
-```
-$ pacstall -I tmpmail-bin
-```
-
-### Nixpkgs
-`tmpmail` is also available in the [nix package collection (only unstable currently)](https://search.nixos.org/packages?channel=unstable&show=tmpmail&from=0&size=50&sort=relevance&query=tmpmail), which is maintained by [legendofmiracles](https://github.com/legendofmiracles)
-
-Either add it to your system packages, install it with nix-env or try it out in a ephemeral nix-shell `nix-shell -p tmpmail`
-
-### Docker
-
-requirements:
- - [docker](https://www.docker.com/)
- - clone this repo
-
-```bash                                                                                        
-$ docker build -t mail .; # Dockerfile available in source code
-$ docker run -it mail;
-```   
 
 ## First time Setup
 Get your APIKEY from https://emptyinbox.me

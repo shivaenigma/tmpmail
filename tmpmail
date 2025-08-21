@@ -193,9 +193,9 @@ EOF
     if [ "$raw_text" = true ]; then
 	    if [ "$text_body" = "null" ]; then
 		    w3m -dump $tmpmail_html_email
-	    else
+	    else  
 		    text_mail="To: $to\nFrom: $from\nSubject: $subject\n$text_body"
-		    echo "$text_mail"
+		    echo -e "$text_mail"
 	    fi
 	    exit
     fi

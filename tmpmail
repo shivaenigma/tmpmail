@@ -23,8 +23,8 @@ raw_text=false
 # restarting the computer
 tmpmail_dir="/tmp/tmpmail"
 
-# The default command that will be used to copy the email address to
-# the user's clipboard when running 'tmpmail --copy'
+# The default command that will be used to copy the activation code to
+# the user's clipboard 
 copy_to_clipboard_cmd="xclip -selection c"
 
 
@@ -44,7 +44,9 @@ usage() {
     cat <<EOF
 tmpmail
 tmpmail -h | --version
-tmpmail -g [ADDRESS]
+tmpmail -g 
+tmpmail -l
+tmpmail [--clipboard-cmd COMMAND] -a
 tmpmail [-t | -b BROWSER] -r | ID
 
 When called with no option and no argument, tmpmail lists the messages in
@@ -55,7 +57,7 @@ shows the email message with specified ID.
         Specify BROWSER that is used to render the HTML of
         the email (default: w3m)
     --clipboard-cmd COMMAND
-        Specify the COMMAND to use for copying the email address to your
+        Specify the COMMAND to use for copying the activation code to your
         clipboard (default: xclip -selection c)
 -l, --list
         Show list of available inboxes
@@ -255,8 +257,9 @@ main() {
     #   xclip -selection c
     #   ├───┘
     #   └ This part
+    clipboard=${copy_to_clipboard_cmd%% *}
 
-    for dependency in jq $browser curl; do
+    for dependency in jq $browser $clipboard curl; do
         if ! command -v "$dependency" >/dev/null 2>&1; then
             # Append to our list of missing dependencies
             dep_missing="$dep_missing $dependency"
@@ -277,6 +280,7 @@ main() {
             --help | -h) usage && exit ;;
             --list | -l) list_inboxes && exit ;;
             --generate | -g) generate_inbox  && exit ;;
+	    --clipboard-cmd) copy_to_clipboard_cmd="$2" ;;
             --acode | -a) activation_code  && exit ;;
             --browser | -b) browser="$2" ;;
             --text | -t) raw_text=true ;;

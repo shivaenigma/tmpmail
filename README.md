@@ -34,6 +34,8 @@ $ tmpmail --help
 tmpmail
 tmpmail -h | --version
 tmpmail -g 
+tmpmail -l
+tmpmail [--clipboard-cmd COMMAND] -a
 tmpmail [-t | -b BROWSER] -r | ID
 
 When called with no option and no argument, tmpmail lists the messages in
@@ -44,14 +46,14 @@ shows the email message with specified ID.
         Specify BROWSER that is used to render the HTML of
         the email (default: w3m)
     --clipboard-cmd COMMAND
-        Specify the COMMAND to use for copying the email address to your
+        Specify the COMMAND to use for copying the activation code to your
         clipboard (default: xclip -selection c)
--c, --copy
-        Copy the email address to your clipboard
--i, --inboxes
+-l, --list
         Show list of available inboxes
 -g, --generate 
         Generate a new email inbox        
+-a, --acode
+        Auto Detect and dump activation code from recent email  
 -h, --help
         Show help
 -r, --recent

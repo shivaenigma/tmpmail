@@ -54,6 +54,8 @@ shows the email message with specified ID.
         Show list of available inboxes
 -g, --generate 
         Generate a new email inbox        
+-a, --acode
+        Auto Detect and dump activation code from recent email  
 -h, --help
         Show help
 -r, --recent
@@ -182,9 +184,9 @@ EOF
     if [ "$raw_text" = true ]; then
 	    if [ "$text_body" = "null" ]; then
 		    w3m -dump $tmpmail_html_email
-	    else	
+	    else
 		    text_mail="To: $to\nFrom: $from\nSubject: $subject\n$text_body"
-		    echo $text_mail
+		    echo "$text_mail"
 	    fi
 	    exit
     fi
@@ -205,6 +207,19 @@ view_recent_email() {
     inbox_id=$(list_emails | head -1 | cut -d' ' -f 1)
     echo $inbox_id
     view_email "$inbox_id"
+}
+
+activation_code(){
+    #Use regex to detect activation code from email
+    #Skip 4 lines from recent email to get msg boxy
+    raw_text=true
+    text=$(view_recent_email | tail -n +5)
+    if [[ "$text" =~ ([A-Z,0-9]{4,}) ]]; then
+	    code=${BASH_REMATCH[1]}
+	    echo "$code"
+    else
+	    echo "Could not detect activation code"
+    fi 
 }
 
 
@@ -254,6 +269,7 @@ main() {
             --help | -h) usage && exit ;;
             --list | -l) list_inboxes && exit ;;
             --generate | -g) generate_inbox  && exit ;;
+            --acode | -a) activation_code  && exit ;;
             --browser | -b) browser="$2" ;;
             --text | -t) raw_text=true ;;
             --version) echo "$version" && exit ;;

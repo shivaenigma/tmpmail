@@ -23,6 +23,10 @@ raw_text=false
 # restarting the computer
 tmpmail_dir="/tmp/tmpmail"
 
+# The default command that will be used to copy the email address to
+# the user's clipboard when running 'tmpmail --copy'
+copy_to_clipboard_cmd="xclip -selection c"
+
 
 # tmpmail.html is where the email gets stored.
 # Even though the file ends with a .html extension, the raw text version of
@@ -50,7 +54,10 @@ shows the email message with specified ID.
 -b, --browser BROWSER
         Specify BROWSER that is used to render the HTML of
         the email (default: w3m)
--i, --inboxes
+    --clipboard-cmd COMMAND
+        Specify the COMMAND to use for copying the email address to your
+        clipboard (default: xclip -selection c)
+-l, --list
         Show list of available inboxes
 -g, --generate 
         Generate a new email inbox        
@@ -216,7 +223,8 @@ activation_code(){
     text=$(view_recent_email | tail -n +5)
     if [[ "$text" =~ ([A-Z,0-9]{4,}) ]]; then
 	    code=${BASH_REMATCH[1]}
-	    echo "$code"
+	    echo "$code" | $copy_to_clipboard_cmd 
+	    echo "Activation code $code copied to clipboard"
     else
 	    echo "Could not detect activation code"
     fi 

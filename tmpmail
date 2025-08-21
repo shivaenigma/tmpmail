@@ -14,29 +14,10 @@ version=1.2.3
 # the HTML of the email
 browser="w3m"
 
-# The default command that will be used to copy the email address to
-# the user's clipboard when running 'tmpmail --copy'
-copy_to_clipboard_cmd="xclip -selection c"
-
 # If the value is set to 'true' tmpmail will convert the HTML email
 # to raw text and send that to stdout
 raw_text=false
 
-# Everything related to 'tmpmail' will be stored in /tmp/tmpmail
-# so that the old emails and email addresses get cleared after
-# restarting the computer
-tmpmail_dir="/tmp/tmpmail"
-
-# tmpmail_email_address is where we store the temporary email address
-# that gets generated. This prevents the user from providing
-# the email address everytime they run tmpmail
-tmpmail_email_address="$tmpmail_dir/email_address"
-
-# tmpmail.html is where the email gets stored.
-# Even though the file ends with a .html extension, the raw text version of
-# the email will also be stored in this file so that w3m and other browsers
-# are able to open this file
-tmpmail_html_email="$tmpmail_dir/tmpmail.html"
 
 # Default 1secmail API URL
 tmpmail_api_url="https://emptyinbox.me/api"
@@ -57,11 +38,6 @@ shows the email message with specified ID.
 -b, --browser BROWSER
         Specify BROWSER that is used to render the HTML of
         the email (default: w3m)
-    --clipboard-cmd COMMAND
-        Specify the COMMAND to use for copying the email address to your
-        clipboard (default: xclip -selection c)
--c, --copy
-        Copy the email address to your clipboard
 -i, --inboxes
         Show list of available inboxes
 -g, --generate 
@@ -81,7 +57,7 @@ EOF
 
 list_inboxes() {
     data=$(call_api inboxes)
-    out=$(printf "%s" "$data" | jq -r '.[ ]')
+    out=$(printf "%s" "$data" | jq -r '.[].inbox')
     echo "$out"
 }
 
@@ -243,12 +219,6 @@ view_recent_email() {
 }
 
 
-copy_email_to_clipboard(){
-    # Copy the email thats being used to the user's clipboard
-    $copy_to_clipboard_cmd < $tmpmail_email_address
-}
-
-
 die() {
     # Print error message and exit
     #
@@ -273,9 +243,8 @@ main() {
     #   xclip -selection c
     #   ├───┘
     #   └ This part
-    clipboard=${copy_to_clipboard_cmd%% *}
 
-    for dependency in jq $browser $clipboard curl; do
+    for dependency in jq $browser curl; do
         if ! command -v "$dependency" >/dev/null 2>&1; then
             # Append to our list of missing dependencies
             dep_missing="$dep_missing $dependency"
@@ -287,20 +256,6 @@ main() {
         exit 1
     fi
 
-    # Create the $tmpmail_dir directory and dont throw any errors
-    # if it already exists
-    mkdir -p "$tmpmail_dir"
-
-
-    # ${VAR#PATTERN} Removes shortest match of pattern from start of a string.
-    # In this case, it takes the email_address and removed everything after
-    # the '@' symbol which gives us the username.
-    username=${email_address%@*}
-
-    # ${VAR%PATTERN} Remove shortest match of pattern from end of a string.
-    # In this case, it takes the email_address and removes everything until the
-    # period '.' which gives us the domain
-    domain=${email_address#*@}
 
     # If no arguments are provided just the emails
     [ $# -eq 0 ] && list_emails && exit
@@ -310,8 +265,6 @@ main() {
             --help | -h) usage && exit ;;
             --list | -l) list_inboxes && exit ;;
             --generate | -g) generate_inbox  && exit ;;
-            --clipboard-cmd) copy_to_clipboard_cmd="$2" ;;
-            --copy | -c) copy_email_to_clipboard && exit ;;
             --browser | -b) browser="$2" ;;
             --text | -t) raw_text=true ;;
             --version) echo "$version" && exit ;;

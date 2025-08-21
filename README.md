@@ -1,9 +1,9 @@
 <h1 align="center">
   <img src="images/logo.png">
 </h1>
-<p align="center"> A temporary email right from your terminal written in POSIX sh</p><br>
+<p align="center"> A temporary email right from your terminal written in bash</p><br>
 
-<img src="images/demo.gif" align="right"> `tmpmail` is a command line utility written in POSIX `sh` that allows you to create multiple inboxes
+<img src="images/demo.gif"/> `tmpmail` is a command line utility written in POSIX `bash` that allows you to create multiple inboxes
 and receive temporary emails to these inboxes. It uses [emptyinbox.me API](https://emptyinbox.me/docs.html) to receive emails.
 
 By default `w3m` is used to render the HTML emails on the terminal.

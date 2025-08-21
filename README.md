@@ -53,7 +53,7 @@ shows the email message with specified ID.
 -g, --generate 
         Generate a new email inbox        
 -a, --acode
-        Auto Detect and dump activation code from recent email  
+        Auto Detect and copy activation code from recent email  
 -h, --help
         Show help
 -r, --recent
@@ -91,6 +91,12 @@ $ tmpmail 086acd15c
 View the most recent email
 ```console
 $ tmpmail -r
+```
+
+Copy activation code from recent email to clipboard
+```console
+$ tmpmail -a
+Activation code 685539 copied to clipboard
 ```
 
 View emails as pure text

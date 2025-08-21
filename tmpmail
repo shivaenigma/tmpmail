@@ -174,29 +174,6 @@ EOF
 )
 
 
-    
-    if [ ! "$attachments" = "0" ]; then
-        html_mail="$html_mail<br><b>[Attachments]</b><br>"
-
-        index=1
-        while [ "$index" -le "$attachments" ]; do
-            filename=$(printf %s "$data" | jq -r ".attachments | .[$index-1] | .filename")
-            link="$tmpmail_api_url?action=download&login=$username&domain=$domain&id=$email_id&file=$filename"
-            html_link="<a href=$link download=$filename>$filename</a><br>"
-
-            if [ "$raw_text" = true ]; then
-                # The actual url is way too long and does not look so nice in STDOUT.
-                # Therefore we will shortening it using is.gd so that it looks nicer.
-                link=$(curl -s -F"url=$link" "https://is.gd/create.php?format=simple")
-                html_mail="$html_mail$link  [$filename]<br>"
-            else
-                html_mail="$html_mail$html_link"
-            fi
-
-            index=$((index + 1))
-        done
-    fi
-
     # Save the $html_mail into $tmpmail_html_email
     printf %s "$html_mail" >"$tmpmail_html_email"
 

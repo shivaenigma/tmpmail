@@ -18,6 +18,18 @@ browser="w3m"
 # to raw text and send that to stdout
 raw_text=false
 
+# Everything related to 'tmpmail' will be stored in /tmp/tmpmail
+# so that the old emails and email addresses get cleared after
+# restarting the computer
+tmpmail_dir="/tmp/tmpmail"
+
+
+# tmpmail.html is where the email gets stored.
+# Even though the file ends with a .html extension, the raw text version of
+# the email will also be stored in this file so that w3m and other browsers
+# are able to open this file
+tmpmail_html_email="$tmpmail_dir/tmpmail.html"
+
 
 # Default 1secmail API URL
 tmpmail_api_url="https://emptyinbox.me/api"

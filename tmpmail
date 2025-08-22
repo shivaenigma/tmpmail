@@ -271,6 +271,10 @@ main() {
         exit 1
     fi
 
+    # Create the $tmpmail_dir directory and dont throw any errors
+    # if it already exists
+    mkdir -p "$tmpmail_dir"
+
 
     # If no arguments are provided just the emails
     [ $# -eq 0 ] && list_emails && exit
